@@ -1,0 +1,778 @@
+---
+title: "Statistics 380 Homework 2"
+author: "Valerie Roth"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1: Flights at ABIA
+
+**Introduction**: I decided to answer the question "What is the best time of year to fly to minimize delays?" To do this, I created a plot that shows the percentage of flights that were late each month, categorized by how late they were. I did not include flights that were over 90 minutes late, because they were rare and I did not expect their occurrences to be statistically significant. I also only looked at arrival lateness, because this is what I expect matters most to passengers.
+
+
+```{r, echo = FALSE}
+#Question: What is the best time of year to fly to minimize delays?
+
+flights = read.csv("ABIA.csv")
+flights = flights[flights$ArrDelay <= 90,]
+attach(flights)
+
+howLate = list()
+for(i in 1:9){
+  lowIndex = 10*(i-1)
+  highIndex = 10*i
+  
+  temp = flights[!is.na(ArrDelay),]
+  temp = temp[temp$ArrDelay > lowIndex,]
+  temp = temp[temp$ArrDelay <= highIndex,]
+  howLate[[length(howLate)+1]] = temp
+}
+
+knownTimeFlights = flights[!is.na(ArrDelay),]
+numJanFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 1,])
+numFebFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 2,])
+numMarFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 3,])
+numAprFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 4,])
+numMayFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 5,])
+numJunFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 6,])
+numJulFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 7,])
+numAugFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 8,])
+numSepFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 9,])
+numOctFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 10,])
+numNovFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 11,])
+numDecFlights = nrow(knownTimeFlights[knownTimeFlights$Month == 12,])
+
+pctLateJan = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateJan[length(pctLateJan)+1] = nrow(temp[temp$Month == 1,])/numJanFlights
+}
+
+pctLateFeb = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateFeb[length(pctLateFeb)+1] = nrow(temp[temp$Month == 2,])/numFebFlights
+}
+
+pctLateMar = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateMar[length(pctLateMar)+1] = nrow(temp[temp$Month == 3,])/numMarFlights
+}
+
+pctLateApr = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateApr[length(pctLateApr)+1] = nrow(temp[temp$Month == 4,])/numAprFlights
+}
+
+pctLateMay = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateMay[length(pctLateMay)+1] = nrow(temp[temp$Month == 5,])/numMayFlights
+}
+
+pctLateJun = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateJun[length(pctLateJun)+1] = nrow(temp[temp$Month == 6,])/numJunFlights
+}
+
+pctLateJul = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateJul[length(pctLateJul)+1] = nrow(temp[temp$Month == 7,])/numJulFlights
+}
+
+pctLateAug = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateAug[length(pctLateAug)+1] = nrow(temp[temp$Month == 8,])/numAugFlights
+}
+
+pctLateSep = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateSep[length(pctLateSep)+1] = nrow(temp[temp$Month == 9,])/numSepFlights
+}
+
+pctLateOct = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateOct[length(pctLateOct)+1] = nrow(temp[temp$Month == 10,])/numOctFlights
+}
+
+pctLateNov = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateNov[length(pctLateNov)+1] = nrow(temp[temp$Month == 11,])/numNovFlights
+}
+
+pctLateDec = c()
+for(i in 1:9) {
+  temp = howLate[[i]]
+  pctLateDec[length(pctLateDec)+1] = nrow(temp[temp$Month == 12,])/numDecFlights
+}
+
+vals = matrix(c(pctLateJan, pctLateFeb, pctLateMar, pctLateApr, pctLateMay, pctLateJun, pctLateJul, pctLateAug, pctLateSep, pctLateOct, pctLateNov, pctLateDec), ncol = 12, byrow = FALSE)
+vals = as.table(vals)
+colnames(vals) = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+rownames(vals) = c("1-10 min", "11-20 min", "21-30 min", "31-40 min", "41-50 min", "51-60 min", "61-70 min", "71-80 min", "81-90 min")
+
+barplot(vals, main= "Percentage of Late Flights by Month", xlab = "Month", ylab = "Percentage", col = c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", "#000000"), ylim=c(0,max(vals) + .042), legend = rownames(vals), beside = TRUE)
+
+```
+
+**Discussion**: I found that September had a particularly low percentage of late flights in all categories. This may be explained by the fact that September does not usually have weather that would slow a plane's arrival down. It is also a month without any major breaks from school or holidays, which would result in fewer passengers at the airport overall. Perhaps when the airport is less crowded fewer flights are late.
+
+Alternatively, I found that June had a large percentage of flights that were 1-10 minutes late. Perhaps this is due to a more crowded airport. I would expect crowding to make flights slightly later, but not by a large amount of time, so these results make sense.
+
+I also found that December had a large percentage of very late flights. I expect that this is because December has particularly bad weather and a large number of travelers (people flying home for the holidays). I expect that bad weather could significantly slow a plane down, so these results also seem to make sense.
+
+Nonetheless, there is not a huge amount of variation in lateness among the months of the year. Therefore, if I were to advise a passenger about the best time of year to fly based on their odds of making it to their destination, I would suggest that they pick a date that appealed to them for other reasons. The slight increase in lateness in certain months is simply not significant enough to plan a trip around.
+
+## Problem 2: Author Attribution
+
+### Naive Bayes:
+```{r, echo = FALSE, include = FALSE}
+#Naive Bayes Model
+library(tm)
+```
+
+```{r, echo = FALSE}
+readerPlain = function(fname){
+  readPlain(elem=list(content=readLines(fname)), 
+            id=fname, language='en') }
+
+## Rolling all directories together into a single corpus
+author_dirs = Sys.glob('STA380/data/ReutersC50/C50train/*')
+file_list = NULL
+labels = NULL
+for(author in author_dirs) {
+  author_name = substring(author, first=29)
+  files_to_add = Sys.glob(paste0(author, '/*.txt'))
+  file_list = append(file_list, files_to_add)
+  labels = append(labels, rep(author_name, length(files_to_add)))
+}
+
+all_docs = lapply(file_list, readerPlain) 
+names(all_docs) = file_list
+names(all_docs) = sub('.txt', '', names(all_docs))
+
+my_corpus = Corpus(VectorSource(all_docs))
+names(my_corpus) = file_list
+
+my_corpus = tm_map(my_corpus, content_transformer(tolower)) # make everything lowercase
+my_corpus = tm_map(my_corpus, content_transformer(removeNumbers)) # remove numbers
+my_corpus = tm_map(my_corpus, content_transformer(removePunctuation)) # remove punctuation
+my_corpus = tm_map(my_corpus, content_transformer(stripWhitespace)) ## remove excess white-space
+my_corpus = tm_map(my_corpus, content_transformer(removeWords), stopwords("SMART"))
+
+DTM = DocumentTermMatrix(my_corpus)
+
+DTM = removeSparseTerms(DTM, 0.975)
+DTM
+
+# Now a dense matrix
+X = as.matrix(DTM)
+
+author1_train = X[1:50,]
+author2_train = X[51:100,]
+author3_train = X[101:150,]
+author4_train = X[151:200,]
+author5_train = X[201:250,]
+author6_train = X[251:300,]
+author7_train = X[301:350,]
+author8_train = X[351:400,]
+author9_train = X[401:450,]
+author10_train = X[451:500,]
+author11_train = X[501:550,]
+author12_train = X[551:600,]
+author13_train = X[601:650,]
+author14_train = X[651:700,]
+author15_train = X[701:750,]
+author16_train = X[751:800,]
+author17_train = X[801:850,]
+author18_train = X[851:900,]
+author19_train = X[901:950,]
+author20_train = X[951:1000,]
+author21_train = X[1001:1050,]
+author22_train = X[1051:1100,]
+author23_train = X[1101:1150,]
+author24_train = X[1151:1200,]
+author25_train = X[1201:1250,]
+author26_train = X[1201:1300,]
+author27_train = X[1301:1350,]
+author28_train = X[1351:1400,]
+author29_train = X[1401:1450,]
+author30_train = X[1451:1500,]
+author31_train = X[1501:1550,]
+author32_train = X[1551:1600,]
+author33_train = X[1601:1650,]
+author34_train = X[1651:1700,]
+author35_train = X[1701:1750,]
+author36_train = X[1751:1800,]
+author37_train = X[1801:1850,]
+author38_train = X[1851:1900,]
+author39_train = X[1901:1950,]
+author40_train = X[1951:2000,]
+author41_train = X[2001:2050,]
+author42_train = X[2051:2100,]
+author43_train = X[2101:2150,]
+author44_train = X[2151:2200,]
+author45_train = X[2201:2250,]
+author46_train = X[2251:2300,]
+author47_train = X[2301:2350,]
+author48_train = X[2351:2400,]
+author49_train = X[2401:2450,]
+author50_train = X[2451:2500,]
+
+smooth_count = 1/nrow(X)
+
+w_author1 = colSums(author1_train + smooth_count)
+w_author1 = w_author1/sum(w_author1)
+
+w_author2 = colSums(author2_train + smooth_count)
+w_author2 = w_author2/sum(w_author2)
+
+w_author3 = colSums(author3_train + smooth_count)
+w_author3 = w_author3/sum(w_author3)
+
+w_author4 = colSums(author4_train + smooth_count)
+w_author4 = w_author4/sum(w_author4)
+
+w_author5 = colSums(author5_train + smooth_count)
+w_author5 = w_author5/sum(w_author5)
+
+w_author6 = colSums(author6_train + smooth_count)
+w_author6 = w_author6/sum(w_author6)
+
+w_author7 = colSums(author7_train + smooth_count)
+w_author7 = w_author7/sum(w_author7)
+
+w_author8 = colSums(author8_train + smooth_count)
+w_author8 = w_author8/sum(w_author8)
+
+w_author9 = colSums(author9_train + smooth_count)
+w_author9 = w_author9/sum(w_author9)
+
+w_author10 = colSums(author10_train + smooth_count)
+w_author10 = w_author10/sum(w_author10)
+
+w_author11 = colSums(author11_train + smooth_count)
+w_author11 = w_author11/sum(w_author11)
+
+w_author12 = colSums(author12_train + smooth_count)
+w_author12 = w_author12/sum(w_author12)
+
+w_author13 = colSums(author13_train + smooth_count)
+w_author13 = w_author13/sum(w_author13)
+
+w_author14 = colSums(author14_train + smooth_count)
+w_author14 = w_author14/sum(w_author14)
+
+w_author15 = colSums(author15_train + smooth_count)
+w_author15 = w_author15/sum(w_author15)
+
+w_author16 = colSums(author16_train + smooth_count)
+w_author16 = w_author16/sum(w_author16)
+
+w_author17 = colSums(author17_train + smooth_count)
+w_author17 = w_author17/sum(w_author17)
+
+w_author18 = colSums(author18_train + smooth_count)
+w_author18 = w_author18/sum(w_author18)
+
+w_author19 = colSums(author19_train + smooth_count)
+w_author19 = w_author9/sum(w_author19)
+
+w_author20 = colSums(author20_train + smooth_count)
+w_author20 = w_author20/sum(w_author20)
+
+w_author21 = colSums(author21_train + smooth_count)
+w_author21 = w_author21/sum(w_author21)
+
+w_author22 = colSums(author22_train + smooth_count)
+w_author22 = w_author22/sum(w_author22)
+
+w_author23 = colSums(author23_train + smooth_count)
+w_author23 = w_author23/sum(w_author23)
+
+w_author24 = colSums(author24_train + smooth_count)
+w_author24 = w_author24/sum(w_author24)
+
+w_author25 = colSums(author25_train + smooth_count)
+w_author25 = w_author25/sum(w_author25)
+
+w_author26 = colSums(author26_train + smooth_count)
+w_author26 = w_author26/sum(w_author26)
+
+w_author27 = colSums(author27_train + smooth_count)
+w_author27 = w_author27/sum(w_author27)
+
+w_author28 = colSums(author28_train + smooth_count)
+w_author28 = w_author28/sum(w_author28)
+
+w_author29 = colSums(author29_train + smooth_count)
+w_author29 = w_author29/sum(w_author29)
+
+w_author30 = colSums(author30_train + smooth_count)
+w_author30 = w_author30/sum(w_author30)
+
+w_author31 = colSums(author31_train + smooth_count)
+w_author31 = w_author31/sum(w_author31)
+
+w_author32 = colSums(author32_train + smooth_count)
+w_author32 = w_author32/sum(w_author32)
+
+w_author33 = colSums(author33_train + smooth_count)
+w_author33 = w_author33/sum(w_author33)
+
+w_author34 = colSums(author34_train + smooth_count)
+w_author34 = w_author34/sum(w_author34)
+
+w_author35 = colSums(author35_train + smooth_count)
+w_author35 = w_author35/sum(w_author35)
+
+w_author36 = colSums(author36_train + smooth_count)
+w_author36 = w_author36/sum(w_author36)
+
+w_author37 = colSums(author37_train + smooth_count)
+w_author37 = w_author37/sum(w_author37)
+
+w_author38 = colSums(author38_train + smooth_count)
+w_author38 = w_author38/sum(w_author38)
+
+w_author39 = colSums(author39_train + smooth_count)
+w_author39 = w_author39/sum(w_author39)
+
+w_author40 = colSums(author40_train + smooth_count)
+w_author40 = w_author40/sum(w_author40)
+
+w_author41 = colSums(author41_train + smooth_count)
+w_author41 = w_author41/sum(w_author41)
+
+w_author42 = colSums(author42_train + smooth_count)
+w_author42 = w_author42/sum(w_author42)
+
+w_author43 = colSums(author43_train + smooth_count)
+w_author43 = w_author43/sum(w_author43)
+
+w_author44 = colSums(author44_train + smooth_count)
+w_author44 = w_author44/sum(w_author44)
+
+w_author45 = colSums(author45_train + smooth_count)
+w_author45 = w_author45/sum(w_author45)
+
+w_author46 = colSums(author46_train + smooth_count)
+w_author46 = w_author46/sum(w_author46)
+
+w_author47 = colSums(author47_train + smooth_count)
+w_author47 = w_author47/sum(w_author47)
+
+w_author48 = colSums(author48_train + smooth_count)
+w_author48 = w_author48/sum(w_author48)
+
+w_author49 = colSums(author49_train + smooth_count)
+w_author49 = w_author49/sum(w_author49)
+
+w_author50 = colSums(author50_train + smooth_count)
+w_author50 = w_author50/sum(w_author50)
+
+author_dirs = Sys.glob('STA380/data/ReutersC50/C50test/*')
+file_list = NULL
+labels = NULL
+for(author in author_dirs) {
+  author_name = substring(author, first=29)
+  files_to_add = Sys.glob(paste0(author, '/*.txt'))
+  file_list = append(file_list, files_to_add)
+  labels = append(labels, rep(author_name, length(files_to_add)))
+}
+
+all_docs = lapply(file_list, readerPlain) 
+names(all_docs) = file_list
+names(all_docs) = sub('.txt', '', names(all_docs))
+
+my_corpus = Corpus(VectorSource(all_docs))
+names(my_corpus) = file_list
+
+my_corpus = tm_map(my_corpus, content_transformer(tolower)) # make everything lowercase
+my_corpus = tm_map(my_corpus, content_transformer(removeNumbers)) # remove numbers
+my_corpus = tm_map(my_corpus, content_transformer(removePunctuation)) # remove punctuation
+my_corpus = tm_map(my_corpus, content_transformer(stripWhitespace)) ## remove excess white-space
+my_corpus = tm_map(my_corpus, content_transformer(removeWords), stopwords("SMART"))
+
+DTM = DocumentTermMatrix(my_corpus)
+
+DTM = removeSparseTerms(DTM, 0.975)
+
+# Now a dense matrix
+x_tests = as.matrix(DTM)
+
+# Let's take a specific test document
+print("Testing document 49...")
+x_test = x_tests[49,]
+
+for (i in names(x_test)) {
+  if (!(i %in% names(w_author1))) {
+    x_test = x_test[!names(x_test) %in% c(i)]
+  }
+}
+
+for (i in names(w_author1)) {
+  if (!(i %in% names(x_test))) {
+    w_author1 = w_author1[!names(w_author1) %in% c(i)]
+  }
+}
+for (i in names(w_author2)) {
+  if (!(i %in% names(x_test))) {
+    w_author2 = w_author2[!names(w_author2) %in% c(i)]
+  }
+}
+for (i in names(w_author3)) {
+  if (!(i %in% names(x_test))) {
+    w_author3 = w_author3[!names(w_author3) %in% c(i)]
+  }
+}
+for (i in names(w_author4)) {
+  if (!(i %in% names(x_test))) {
+    w_author4 = w_author4[!names(w_author4) %in% c(i)]
+  }
+}
+for (i in names(w_author5)) {
+  if (!(i %in% names(x_test))) {
+    w_author5 = w_author5[!names(w_author5) %in% c(i)]
+  }
+}
+for (i in names(w_author6)) {
+  if (!(i %in% names(x_test))) {
+    w_author6 = w_author6[!names(w_author6) %in% c(i)]
+  }
+}
+for (i in names(w_author7)) {
+  if (!(i %in% names(x_test))) {
+    w_author7 = w_author7[!names(w_author7) %in% c(i)]
+  }
+}
+for (i in names(w_author8)) {
+  if (!(i %in% names(x_test))) {
+    w_author8 = w_author8[!names(w_author8) %in% c(i)]
+  }
+}
+for (i in names(w_author9)) {
+  if (!(i %in% names(x_test))) {
+    w_author9 = w_author9[!names(w_author9) %in% c(i)]
+  }
+}
+for (i in names(w_author10)) {
+  if (!(i %in% names(x_test))) {
+    w_author10 = w_author10[!names(w_author10) %in% c(i)]
+  }
+}
+for (i in names(w_author11)) {
+  if (!(i %in% names(x_test))) {
+    w_author11 = w_author11[!names(w_author11) %in% c(i)]
+  }
+}
+for (i in names(w_author12)) {
+  if (!(i %in% names(x_test))) {
+    w_author12 = w_author12[!names(w_author12) %in% c(i)]
+  }
+}
+for (i in names(w_author13)) {
+  if (!(i %in% names(x_test))) {
+    w_author13 = w_author13[!names(w_author13) %in% c(i)]
+  }
+}
+for (i in names(w_author14)) {
+  if (!(i %in% names(x_test))) {
+    w_author14 = w_author14[!names(w_author14) %in% c(i)]
+  }
+}
+for (i in names(w_author15)) {
+  if (!(i %in% names(x_test))) {
+    w_author15 = w_author15[!names(w_author15) %in% c(i)]
+  }
+}
+for (i in names(w_author16)) {
+  if (!(i %in% names(x_test))) {
+    w_author16 = w_author16[!names(w_author16) %in% c(i)]
+  }
+}
+for (i in names(w_author17)) {
+  if (!(i %in% names(x_test))) {
+    w_author17 = w_author17[!names(w_author17) %in% c(i)]
+  }
+}
+for (i in names(w_author18)) {
+  if (!(i %in% names(x_test))) {
+    w_author18 = w_author18[!names(w_author18) %in% c(i)]
+  }
+}
+for (i in names(w_author19)) {
+  if (!(i %in% names(x_test))) {
+    w_author19 = w_author19[!names(w_author19) %in% c(i)]
+  }
+}
+for (i in names(w_author20)) {
+  if (!(i %in% names(x_test))) {
+    w_author20 = w_author20[!names(w_author20) %in% c(i)]
+  }
+}
+for (i in names(w_author21)) {
+  if (!(i %in% names(x_test))) {
+    w_author21 = w_author21[!names(w_author21) %in% c(i)]
+  }
+}
+for (i in names(w_author22)) {
+  if (!(i %in% names(x_test))) {
+    w_author22 = w_author22[!names(w_author22) %in% c(i)]
+  }
+}
+for (i in names(w_author23)) {
+  if (!(i %in% names(x_test))) {
+    w_author23 = w_author23[!names(w_author23) %in% c(i)]
+  }
+}
+for (i in names(w_author24)) {
+  if (!(i %in% names(x_test))) {
+    w_author24 = w_author24[!names(w_author24) %in% c(i)]
+  }
+}
+for (i in names(w_author25)) {
+  if (!(i %in% names(x_test))) {
+    w_author25 = w_author25[!names(w_author25) %in% c(i)]
+  }
+}
+for (i in names(w_author26)) {
+  if (!(i %in% names(x_test))) {
+    w_author26 = w_author26[!names(w_author26) %in% c(i)]
+  }
+}
+for (i in names(w_author27)) {
+  if (!(i %in% names(x_test))) {
+    w_author27 = w_author27[!names(w_author27) %in% c(i)]
+  }
+}
+for (i in names(w_author28)) {
+  if (!(i %in% names(x_test))) {
+    w_author28 = w_author28[!names(w_author28) %in% c(i)]
+  }
+}
+for (i in names(w_author29)) {
+  if (!(i %in% names(x_test))) {
+    w_author29 = w_author29[!names(w_author29) %in% c(i)]
+  }
+}
+for (i in names(w_author30)) {
+  if (!(i %in% names(x_test))) {
+    w_author30 = w_author30[!names(w_author30) %in% c(i)]
+  }
+}
+for (i in names(w_author31)) {
+  if (!(i %in% names(x_test))) {
+    w_author31 = w_author31[!names(w_author31) %in% c(i)]
+  }
+}
+for (i in names(w_author32)) {
+  if (!(i %in% names(x_test))) {
+    w_author32 = w_author32[!names(w_author32) %in% c(i)]
+  }
+}
+for (i in names(w_author33)) {
+  if (!(i %in% names(x_test))) {
+    w_author33 = w_author33[!names(w_author33) %in% c(i)]
+  }
+}
+for (i in names(w_author34)) {
+  if (!(i %in% names(x_test))) {
+    w_author34 = w_author34[!names(w_author34) %in% c(i)]
+  }
+}
+for (i in names(w_author35)) {
+  if (!(i %in% names(x_test))) {
+    w_author35 = w_author35[!names(w_author35) %in% c(i)]
+  }
+}
+for (i in names(w_author36)) {
+  if (!(i %in% names(x_test))) {
+    w_author36 = w_author36[!names(w_author36) %in% c(i)]
+  }
+}
+for (i in names(w_author37)) {
+  if (!(i %in% names(x_test))) {
+    w_author37 = w_author37[!names(w_author37) %in% c(i)]
+  }
+}
+for (i in names(w_author38)) {
+  if (!(i %in% names(x_test))) {
+    w_author38 = w_author38[!names(w_author38) %in% c(i)]
+  }
+}
+for (i in names(w_author39)) {
+  if (!(i %in% names(x_test))) {
+    w_author39 = w_author39[!names(w_author39) %in% c(i)]
+  }
+}
+for (i in names(w_author40)) {
+  if (!(i %in% names(x_test))) {
+    w_author40 = w_author40[!names(w_author40) %in% c(i)]
+  }
+}
+for (i in names(w_author41)) {
+  if (!(i %in% names(x_test))) {
+    w_author41 = w_author41[!names(w_author41) %in% c(i)]
+  }
+}
+for (i in names(w_author42)) {
+  if (!(i %in% names(x_test))) {
+    w_author42 = w_author42[!names(w_author42) %in% c(i)]
+  }
+}
+for (i in names(w_author43)) {
+  if (!(i %in% names(x_test))) {
+    w_author43 = w_author43[!names(w_author43) %in% c(i)]
+  }
+}
+for (i in names(w_author44)) {
+  if (!(i %in% names(x_test))) {
+    w_author44 = w_author44[!names(w_author44) %in% c(i)]
+  }
+}
+for (i in names(w_author45)) {
+  if (!(i %in% names(x_test))) {
+    w_author45 = w_author45[!names(w_author45) %in% c(i)]
+  }
+}
+for (i in names(w_author46)) {
+  if (!(i %in% names(x_test))) {
+    w_author46 = w_author46[!names(w_author46) %in% c(i)]
+  }
+}
+for (i in names(w_author47)) {
+  if (!(i %in% names(x_test))) {
+    w_author47 = w_author47[!names(w_author47) %in% c(i)]
+  }
+}
+for (i in names(w_author48)) {
+  if (!(i %in% names(x_test))) {
+    w_author48 = w_author48[!names(w_author48) %in% c(i)]
+  }
+}
+for (i in names(w_author49)) {
+  if (!(i %in% names(x_test))) {
+    w_author49 = w_author49[!names(w_author49) %in% c(i)]
+  }
+}
+for (i in names(w_author50)) {
+  if (!(i %in% names(x_test))) {
+    w_author50 = w_author50[!names(w_author50) %in% c(i)]
+  }
+}
+
+sprintf(("Author 1 (Aaron Pressman): %.3f"), sum(x_test*log(w_author1)))
+sprintf(("Author 2 (Alan Crosby): %.3f"), sum(x_test*log(w_author2)))
+sprintf(("Author 3 (Alexander Smith): %.3f"), sum(x_test*log(w_author3)))
+sprintf(("Author 4 (Benjamin Kang Lim): %.3f"), sum(x_test*log(w_author4)))
+sprintf(("Author 5 (BernardHickey): %.3f"), sum(x_test*log(w_author5)))
+sprintf(("Author 6 (BradDorfman): %.3f"), sum(x_test*log(w_author6)))
+sprintf(("Author 7 (Darren Schuettler): %.3f"), sum(x_test*log(w_author7)))
+sprintf(("Author 8 (David Lawder): %.3f"), sum(x_test*log(w_author8)))
+sprintf(("Author 9 (Edna Fernandes): %.3f"), sum(x_test*log(w_author9)))
+sprintf(("Author 10 (Eric Auchard): %.3f"), sum(x_test*log(w_author10)))
+sprintf(("Author 11 (Fumiko Fujisaki): %.3f"), sum(x_test*log(w_author11)))
+sprintf(("Author 12 (Graham Earnshaw): %.3f"), sum(x_test*log(w_author12)))
+sprintf(("Author 13 (Heather Scoffield): %.3f"), sum(x_test*log(w_author13)))
+sprintf(("Author 14 (Jane Macartney): %.3f"), sum(x_test*log(w_author14)))
+sprintf(("Author 15 (Jan Lopatka): %.3f"), sum(x_test*log(w_author15)))
+sprintf(("Author 16 (Jim Gilchrist): %.3f"), sum(x_test*log(w_author16)))
+sprintf(("Author 17 (Joe Ortiz): %.3f"), sum(x_test*log(w_author17)))
+sprintf(("Author 18 (John Mastrini): %.3f"), sum(x_test*log(w_author18)))
+sprintf(("Author 19 (Johnathan Birt): %.3f"), sum(x_test*log(w_author19)))
+sprintf(("Author 20 (Jo Winterbottom): %.3f"), sum(x_test*log(w_author20)))
+sprintf(("Author 21 (Karl Penhaul): %.3f"), sum(x_test*log(w_author21)))
+sprintf(("Author 22 (Keith Weir): %.3f"), sum(x_test*log(w_author22)))
+sprintf(("Author 23 (Kevin Drawbaugh): %.3f"), sum(x_test*log(w_author23)))
+sprintf(("Author 24 (Kevin Morrison): %.3f"), sum(x_test*log(w_author24)))
+sprintf(("Author 25 (Kirstin Ridley): %.3f"), sum(x_test*log(w_author25)))
+sprintf(("Author 26 (Kourosh Karimkhany): %.3f"), sum(x_test*log(w_author26)))
+sprintf(("Author 27 (Lydia Zajc): %.3f"), sum(x_test*log(w_author27)))
+sprintf(("Author 28 (Lynne O'Donnel): %.3f"), sum(x_test*log(w_author28)))
+sprintf(("Author 29 (Lynnley Browning): %.3f"), sum(x_test*log(w_author29)))
+sprintf(("Author 30 (Marcel Michelson): %.3f"), sum(x_test*log(w_author30)))
+sprintf(("Author 31 (Mark Bendeich): %.3f"), sum(x_test*log(w_author31)))
+sprintf(("Author 32 (Martin Wolk): %.3f"), sum(x_test*log(w_author32)))
+sprintf(("Author 33 (Matthew Bunce): %.3f"), sum(x_test*log(w_author33)))
+sprintf(("Author 34 (Michael Connor): %.3f"), sum(x_test*log(w_author34)))
+sprintf(("Author 35 (Mure Dickie): %.3f"), sum(x_test*log(w_author35)))
+sprintf(("Author 36 (Nick Louth): %.3f"), sum(x_test*log(w_author36)))
+sprintf(("Author 37 (Patricia Commins): %.3f"), sum(x_test*log(w_author37)))
+sprintf(("Author 38 (Peter Humphrey): %.3f"), sum(x_test*log(w_author38)))
+sprintf(("Author 39 (Pierre Tran): %.3f"), sum(x_test*log(w_author39)))
+sprintf(("Author 40 (Robin Sidel): %.3f"), sum(x_test*log(w_author40)))
+sprintf(("Author 41 (Roger Fillion): %.3f"), sum(x_test*log(w_author41)))
+sprintf(("Author 42 (Samuel Perry): %.3f"), sum(x_test*log(w_author42)))
+sprintf(("Author 43 (Sarah Davison): %.3f"), sum(x_test*log(w_author43)))
+sprintf(("Author 44 (Scott Hillis): %.3f"), sum(x_test*log(w_author44)))
+sprintf(("Author 45 (Simon Cowell): %.3f"), sum(x_test*log(w_author45)))
+sprintf(("Author 46 (Tan Ee Lyn): %.3f"), sum(x_test*log(w_author46)))
+sprintf(("Author 47 (Therese Poletti): %.3f"), sum(x_test*log(w_author47)))
+sprintf(("Author 48 (Tim Farrand): %.3f"), sum(x_test*log(w_author48)))
+sprintf(("Author 49 (Todd Nissen): %.3f"), sum(x_test*log(w_author49)))
+sprintf(("Author 50 (William Kazer): %.3f"), sum(x_test*log(w_author50)))
+```
+
+### Linear Regression
+```{r, echo = FALSE, include = FALSE}
+library(glmnet)
+```
+
+```{r, echo = FALSE}
+authors = c(rep(1, each = 50), rep(2, each = 50), rep(3, each = 50), rep(4, each = 50), rep(5, each = 50), rep(6, each = 50), rep(7, each = 50), rep(8, each = 50), rep(9, each = 50), rep(10, each = 50), rep(11, each = 50), rep(12, each = 50), rep(13, each = 50), rep(14, each = 50), rep(15, each = 50), rep(16, each = 50), rep(17, each = 50), rep(18, each = 50), rep(19, each = 50), rep(20, each = 50), rep(21, each = 50), rep(22, each = 50), rep(23, each = 50), rep(24, each = 50), rep(25, each = 50), rep(26, each = 50), rep(27, each = 50), rep(28, each = 50), rep(29, each = 50), rep(30, each = 50), rep(31, each = 50), rep(32, each = 50), rep(33, each = 50), rep(34, each = 50), rep(35, each = 50), rep(36, each = 50), rep(37, each = 50), rep(38, each = 50), rep(39, each = 50), rep(40, each = 50), rep(41, each = 50), rep(42, each = 50), rep(43, each = 50), rep(44, each = 50), rep(45, each = 50), rep(46, each = 50), rep(47, each = 50), rep(48, each = 50), rep(49, each = 50), rep(50, each = 50))
+
+X = cbind(X, authors) #we will predict this
+X = data.frame(X)
+model = glm(X$authors ~ ., X, family = "gaussian")
+
+#summary(model)
+```
+
+**Discussion**: I used a naive bayes and a linear regression model. Features for both models were simply the words (besides stopwords) found in the documents.
+
+Authors that the algorithm struggles to distinguish from each other are ones with similar values in the naive bayes algorithm. We can see that there are some examples of this. For instance, author 28 (Lynne O'Donnel) and author 29 (Lynnley Browning) must be similar, having values of -1191.685 and -1190.729, respectively.
+
+I prefer naive bayes because I can immediately see which authors are similar. This similarity can help explain why a model would not predict certain articles well if there is another author that a document is very likely to be attributed to as well. Linear regression simply tells us which terms are important for prediction. This is neat, because it tells us which terms may be distinctive of some particular writers, however it does not allow us to attribute that style to a particular person as easily.
+
+Since I had so many words (predictors) to look at, a summary of mylinear model is not shown. It is commented out, so the grader can comment it back in if they choose. Some particularly significant predictors include the word "users" (perhaps there are some writers distinguishable by the fact that they write about tech), thought, produce (economics writers, perhaps?), operations, online, link, japans, european, etc. This seems to indicate that the authors may have different focuses which helps to distinguish them.
+
+## Problem 3: Practice with Association Rule Mining
+
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+library(arules)
+
+groceries = scan("STA380/data/groceries.txt", what="", sep="\n")
+groceries = strsplit(groceries, ",")
+
+## Remove duplicates ("de-dupe")
+groceries = lapply(groceries, unique)
+
+str(groceries)
+groceries = as(groceries, "transactions")
+
+groceryrules = apriori(groceries, parameter = list(support = .01, confidence = .5, maxlen = 4))
+```
+
+```{r, echo = FALSE}
+inspect(subset(groceryrules, subset = lift > 3))
+inspect(subset(groceryrules, subset = confidence > .58))
+inspect(subset(groceryrules, subset = support > .012 & confidence > .55))
+```
+
+**Discoveries**
+
+* By looking at lift > 3, I found that people who purchased citrus fruit and root vegetables are approximately 3 times more likely to have purchased other vegetables as well. The same goes for people who have purchased root vegetables, and tropical fruit.
+* By looking at confidence > .58, I found that whole milk appears in baskets containing curd and yogurt approximately 58.2% of the time. I also found that "other vegetables" appear in baskets with citrus fruit and root vegetables approximately 58.6% of the time. Additionally, people who purchase root vegetables and tropical fruit purchase other vegetables approximately 58.5% of the time.
+* By looking at support > .012 & confidence > .55, I found that overall approximately 1.2% of purchases include domestic eggs, other vegetables and whole milk (can be seen by only looking at support). I found that whole milk appears in baskets with domestic eggs and other vegetables approximately 55% of the time. I also found that about 1.2% of purchases include root vegetables, tropical fruit, and other vegetables. I found that other vegetables appear in baskets with root vegetables and tropical fruit approximately 58% of the time. I also found that approximately 1.5% of purchases include root vegetables, yogurt and whole milk. Whole milk appears in purchases with root vegetables and yogurt approximately 56% of the time.
